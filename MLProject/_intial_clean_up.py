@@ -77,5 +77,5 @@ def _create_pos_neg_features() :
 
 val = _read_data('../train.tsv')
 _create_pos_neg_features()
-print posneg_feature_vectors
+#print posneg_feature_vectors
 print val
