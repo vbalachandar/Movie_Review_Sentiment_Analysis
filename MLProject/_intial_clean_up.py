@@ -69,7 +69,7 @@ def _create_pos_neg_features() :
 			neg[negatives[i]] = i
 	posneg = dict(list(pos.items()) + list(neg.items()))
 	for i in range(len(word_lists)):
-		vect = [0 for i in range(len(posneg.keys())]
+		vect = [0 for i in range(len(posneg.keys()))]
 		for word in word_lists[i].split(' '):
 			if word in posneg:
 				vect[posneg[word]] = 1
