@@ -7,7 +7,8 @@ from itertools import ifilterfalse
 from nltk import pos_tag, word_tokenize
 from nltk.corpus import treebank
 
-
+word_lists = []
+posneg_feature_vectors = []
 def _read_data(file_name):
     """
 
@@ -17,8 +18,9 @@ def _read_data(file_name):
         tsvin = csv.reader(tsvin, delimiter='\t')
 
         for row in tsvin:
-            _word_List = _expand_clitics(row[2])
-            _tag_input_sentence(_word_List)
+            _word_list = _expand_clitics(row[2])
+	    word_lists.extend(_word_list)
+            #_tag_input_sentence(_word_list)
 
     return 0
 
@@ -53,6 +55,19 @@ def _tag_input_sentence(input_phrase):
     #print tagged
     return 0
 
+def _create_pos_neg_features() :
+	with open('../opinion-lexicon-English/positive-words.txt', 'r') as f:
+		positives = f.readlines()[35:]
+	with open('../opinion-lexicon-English/negative-words.txt', 'r') as f:
+		negatives = f.readlines()[35:]
+	for i in range(len(word_lists)):
+            	posneg = dict(list({p: 0 for p in positives}.items()) + list({n: 0 for n in negatives}.items()))
+		for word in word_lists[i].split(' '):
+			if word in posneg:
+				posneg[word] = 1
+        	posneg_feature_vectors.extend([posneg[key] for key in posneg])  	
 
-val = _read_data('/media/New Volume/Acads/UIClinks/Machine Learning/Project/train.tsv')
+val = _read_data('../train.tsv')
+_create_pos_neg_features()
+print posneg_feature_vectors
 print val
