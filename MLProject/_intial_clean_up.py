@@ -9,6 +9,7 @@ from nltk.corpus import treebank
 
 word_lists = []
 posneg_feature_vectors = []
+
 def _read_data(file_name):
     """
 
@@ -58,14 +59,21 @@ def _tag_input_sentence(input_phrase):
 def _create_pos_neg_features() :
 	with open('../opinion-lexicon-English/positive-words.txt', 'r') as f:
 		positives = f.readlines()[35:]
+		pos = dict()
+		for i in range(len(positives)):
+			pos[positives[i]] = i
 	with open('../opinion-lexicon-English/negative-words.txt', 'r') as f:
 		negatives = f.readlines()[35:]
+		neg = dict()
+		for i in range(len(positives), len(positives) + len(neg)):
+			neg[negatives[i]] = i
+	posneg = dict(list(pos.items()) + list(neg.items()))
 	for i in range(len(word_lists)):
-            	posneg = dict(list({p: 0 for p in positives}.items()) + list({n: 0 for n in negatives}.items()))
+		vect = [0 for i in range(len(posneg.keys())]
 		for word in word_lists[i].split(' '):
 			if word in posneg:
-				posneg[word] = 1
-        	posneg_feature_vectors.extend([posneg[key] for key in posneg])  	
+				vect[posneg[word]] = 1
+        	posneg_feature_vectors.extend(vect)
 
 val = _read_data('../train.tsv')
 _create_pos_neg_features()
