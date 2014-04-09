@@ -1,13 +1,14 @@
+__author__ = 'abhinaya'
 
 from itertools import repeat
 import csv
 import re
-import numpy as np
+import sklearn
 
 from itertools import ifilterfalse
 from nltk import pos_tag, word_tokenize
 from nltk.corpus import treebank
-from sklearn.feature_selection import SelectKBest, SelectPercentile, chi2
+from sklearn.feature_selection import SelectKBest, chi2
 
 
 word_lists = []
@@ -15,8 +16,6 @@ posneg_feature_vectors = []
 label_vector = []
 pos = dict()
 neg = dict()
-posneg = dict()
-global_index = 0
 
 def _read_data(file_name):
     """
@@ -65,37 +64,24 @@ def _tag_input_sentence(input_phrase):
     #print tagged
     return 0
 
-def build_train_data_matrix():
-    for j in range(10000):
-        vect = [0 for i in range(global_index)]
-        for word in word_lists[j]:
-            if word in posneg:
-                vect[posneg[word]] = 1
-                print word
-        posneg_feature_vectors.append(vect)
-
-    return 0
 
 def _create_pos_neg_features():
 
     dictionary_index = 0
-    with open('.../opinion-lexicon-English/positive-words.txt', 'r') as f:
+
+    with open('/media/New Volume/Acads/UIClinks/Machine Learning/Project/opinion-lexicon-English/positive-words.txt', 'r') as f:
         positives = f.readlines()[35:]
         for i in range(len(positives)):
             pos[positives[i].rstrip('\n')] = dictionary_index
-            posneg[positives[i].rstrip('\n')] = dictionary_index
             dictionary_index = dictionary_index+1
 
 
-    with open('.../opinion-lexicon-English/negative-words.txt', 'r') as f:
+    with open('/media/New Volume/Acads/UIClinks/Machine Learning/Project/opinion-lexicon-English/negative-words.txt', 'r') as f:
         negatives = f.readlines()[35:]
         for k in range(len(negatives)):
             neg[negatives[k].rstrip('\n')] = dictionary_index
-            posneg[positives[i].rstrip('\n')] = dictionary_index
             dictionary_index = dictionary_index+1
 
-    global global_index
-    global_index = dictionary_index
     return 0
 
 def _build_features():
@@ -123,33 +109,18 @@ def _build_features():
 
     return 0
 
-def featureSelect(X,y):
-    ch2=SelectKBest(chi2,k=100)
+def featureSelect(X,y):#X_test):
+    ch2=SelectKBest(chi2,k=3)
     X_train=ch2.fit_transform(X, y)
     #X_test=ch2.transform(X_test)
-    return X_train
+    return X_train #,X_test
 
 
-val = _read_data('.../train.tsv')
+val = _read_data('/media/New Volume/Acads/UIClinks/Machine Learning/Project/train.tsv')
 _create_pos_neg_features()
-build_train_data_matrix()
+_build_features()
+print posneg_feature_vectors
+#print featureSelect(posneg_feature_vectors,label_vector)
 
-new_label = label_vector[0:10000]
-
-new_label_matrix = np.array(new_label)
-shape = (10000,1)
-new_label_matrix.reshape(shape)
-
-new_feature_vector = np.array(posneg_feature_vectors)
-shape2 = (10000,len(new_feature_vector[0]))
-new_feature_vector.reshape(shape2)
-
-
-print featureSelect(new_feature_vector,new_label_matrix)
-
-
-
-
-
-
+#print posneg_feature_vectors
 
