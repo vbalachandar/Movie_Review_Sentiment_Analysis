@@ -1,0 +1,17 @@
+
+Steps involved:
+
+1a) Read file put into datastructure
+2)  Preprocessing of data:
+    a) Expand clitics --> piece of code (Bala)
+    b) 
+    
+2) Tag the sentences (NLTK has tagger) (Abhi)
+3) Remove stop words(NLTK has inbuilt stop words) --- We will leave it for now
+4a) Find method to run the chi-square test in python for feature selection (Abhi/Bala)
+4b) Pass through Chi-square test to determine highly informational features
+5) After forming feature vector pass through the classifier
+
+
+Activities:
+1) 
