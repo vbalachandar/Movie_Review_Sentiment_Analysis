@@ -132,6 +132,7 @@ def featureSelect(X,y):
 
 val = _read_data('.../train.tsv')
 _create_pos_neg_features()
+<<<<<<< HEAD
 build_train_data_matrix()
 
 new_label = label_vector[0:10000]
@@ -153,3 +154,7 @@ print featureSelect(new_feature_vector,new_label_matrix)
 
 
 
+=======
+#print posneg_feature_vectors
+print val
+>>>>>>> 3ed38683ec9b3b86c950ff6df2354866dca07ff6
