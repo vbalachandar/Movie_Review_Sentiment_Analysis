@@ -15,6 +15,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import linear_model
 from sklearn import metrics
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import DistanceMetric
 
 
 word_lists = []
@@ -256,7 +258,8 @@ def k_fold_cross_validation(train_set,label_matrix):
    # y_test.reshape(shape)
 
 
-    clf = svm.SVC(kernel='linear', C=1)#.fit(X_train, y_train)
+    clf = KNeighborsClassifier(5, 'distance', 'auto')
+    #clf = svm.SVC(kernel='linear', C=1)#.fit(X_train, y_train)
     #clf= linear_model.LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None)
     #clf.fit(train_array,label_array)
     #print "X",len(train_array)
