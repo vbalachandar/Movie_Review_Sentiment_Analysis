@@ -139,7 +139,7 @@ def _create_pos_neg_features():
 
     dictionary_index = 0
     #with open('/media/New Volume/Acads/UIClinks/Machine Learning/Project/opinion-lexicon-English/positive-words.txt', 'r') as f:
-    with open('C:\\Users\\balachandar\\Documents\\GitHub\\Movie_Review_Sentiment_Analysis\\opinion-lexicon-English\\positive-words.txt', 'r') as f:
+    with open('../opinion-lexicon-English/positive-words.txt', 'r') as f:
         positives = f.readlines()[35:]
         for i in range(len(positives)):
             pos[positives[i].rstrip('\n')] = dictionary_index
@@ -148,13 +148,12 @@ def _create_pos_neg_features():
   
   
     #with open('/media/New Volume/Acads/UIClinks/Machine Learning/Project/opinion-lexicon-English/negative-words.txt', 'r') as f:
-    with open('C:\\Users\\balachandar\\Documents\\GitHub\\Movie_Review_Sentiment_Analysis\\opinion-lexicon-English\\negative-words.txt', 'r') as f:
+    with open('../opinion-lexicon-English/negative-words.txt', 'r') as f:
         negatives = f.readlines()[35:]
         for k in range(len(negatives)):
             neg[negatives[k].rstrip('\n')] = dictionary_index
             posneg[positives[i].rstrip('\n')] = dictionary_index
             dictionary_index = dictionary_index+1
-    
     
     # Adding words that are not present in the posneg dictionary
     #please comment out this section if you must use more than 7000 samples
@@ -177,9 +176,6 @@ def _create_pos_neg_features():
     posneg['DT']=dictionary_index
     
     dictionary_index=dictionary_index+1
-    
-    
-    
     
     global global_index
     
@@ -212,8 +208,6 @@ def _build_features():
         posneg_feature_vectors.append(vect)
 
     return 0
-
-
 
 def removeStopwords(wordList):
         #remove the stop words from the NLTK Stop words list
@@ -258,8 +252,8 @@ def k_fold_cross_validation(train_set,label_matrix):
    # y_test.reshape(shape)
 
 
-    clf = KNeighborsClassifier(5, 'distance', 'auto')
-    #clf = svm.SVC(kernel='linear', C=1)#.fit(X_train, y_train)
+    #clf = KNeighborsClassifier(10, 'distance', 'auto')
+    clf = svm.SVC(kernel='linear', C=1)#.fit(X_train, y_train)
     #clf= linear_model.LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None)
     #clf.fit(train_array,label_array)
     #print "X",len(train_array)
@@ -273,16 +267,7 @@ def k_fold_cross_validation(train_set,label_matrix):
     #print(scores)
     return 0
 
-
-
-
-
-
-
-
-
-
-val = _read_data('train.tsv')
+val = _read_data('../train.tsv')
 
 _create_pos_neg_features()
 
@@ -302,15 +287,5 @@ shape2 = (set_size,len(new_feature_vector[0]))
 
 new_feature_vector.reshape(shape2)
 
-
 train_set = featureSelect(new_feature_vector,new_label_matrix)
 k_fold_cross_validation(train_set,new_label_matrix)
-
-
-
-
-
-
-
-
-
