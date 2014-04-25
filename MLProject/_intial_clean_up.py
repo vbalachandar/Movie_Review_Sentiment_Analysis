@@ -1,4 +1,3 @@
-
 from itertools import repeat
 import csv
 import re
@@ -17,7 +16,7 @@ from sklearn import linear_model
 from sklearn import metrics
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import DistanceMetric
-
+from sklearn.naive_bayes import GaussianNB
 
 word_lists = []
 word_list_tagged=[]
@@ -58,12 +57,10 @@ def _read_data(file_name):
             
             #building  features for other parts of speech
             tagged = _tag_input_sentence(_expand_clitics(row[2]))          
-             
             
             count=0
             # to get all the words that are Nouns,Verbs,Adj
             for i in tagged:
-                
                  
                 if i not in posneg and i not in part_of_speech and i not in stopwords:
                         count=count+1
@@ -73,17 +70,13 @@ def _read_data(file_name):
                             part_of_speech.append(i[0])
                         if i[1][0]=='V':
                             part_of_speech.append(i[0])
-                   
                             
             #_tag_input_sentence(_word_list)
 
-   
     return 0
-
 
 def _read_sentiment_words(file_name):
     return 0;
-
 
 def _expand_clitics(input_phrase):
     """
@@ -96,14 +89,11 @@ def _expand_clitics(input_phrase):
     input_phrase = re.sub('(n\'t)', " not", input_phrase)
     return input_phrase
 
-
 def _create_matrix():
     return 0
 
-
 def _create_feature_vector():
     return 0
-
 
 def _tag_input_sentence(input_phrase):
     tagged = pos_tag(word_tokenize(input_phrase))
@@ -120,7 +110,7 @@ def build_train_data_matrix():
             #Adding direction changer as a feature
             elif tag=='IN' or word.lower() in ('but','yet'):
                 vect[posneg['dc']]=1
-          
+            
             # adding determiner as a feature
             elif tag=="DT":
                 vect[posneg['DT']]=1
@@ -131,9 +121,7 @@ def build_train_data_matrix():
                 
         posneg_feature_vectors.append(vect)
         
-
     return 0
-
 
 def _create_pos_neg_features():
 
@@ -145,7 +133,6 @@ def _create_pos_neg_features():
             pos[positives[i].rstrip('\n')] = dictionary_index
             posneg[positives[i].rstrip('\n')] = dictionary_index
             dictionary_index = dictionary_index+1
-  
   
     #with open('/media/New Volume/Acads/UIClinks/Machine Learning/Project/opinion-lexicon-English/negative-words.txt', 'r') as f:
     with open('../opinion-lexicon-English/negative-words.txt', 'r') as f:
@@ -217,6 +204,7 @@ def removeStopwords(wordList):
 
 def featureSelect(X,y):
     ch2=SelectKBest(chi2,k=top_k_features)
+    ch2=SelectKBest(chi2,k='all')
     X_train=ch2.fit_transform(X, y)
     #X_test=ch2.transform(X_test)
     return X_train
@@ -228,11 +216,11 @@ def k_fold_cross_validation(train_set,label_matrix):
 
     train_array = np.array(train_set)
     shape = (set_size,top_k_features)
-    train_array.reshape(shape)
+    #train_array.reshape(shape)
 
     label_array = np.array(label_matrix)
-    shape = (set_size,)
-    label_array.reshape(shape)
+    '''shape = (set_size,)
+    label_array.reshape(shape)'''
 
    # X_train, X_test, y_train, y_test = cross_validation.train_test_split(train_array, label_array, test_size=0.1, random_state=0)
    # X_train = np.array(X_train)
@@ -251,10 +239,10 @@ def k_fold_cross_validation(train_set,label_matrix):
    # shape = (1000,)
    # y_test.reshape(shape)
 
-
-    #clf = KNeighborsClassifier(10, 'distance', 'auto')
-    clf = svm.SVC(kernel='linear', C=1)#.fit(X_train, y_train)
-    #clf= linear_model.LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None)
+    #clf = GaussianNB()
+    #clf = KNeighborsClassifier(5, 'distance', 'auto')
+    #clf = svm.SVC(kernel='linear', C=1)#.fit(X_train, y_train)
+    #clf = linear_model.LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None)
     #clf.fit(train_array,label_array)
     #print "X",len(train_array)
     #dec = clf.decision_function([[1]])
@@ -271,7 +259,8 @@ val = _read_data('../train.tsv')
 
 _create_pos_neg_features()
 
-build_train_data_matrix()
+#build_train_data_matrix()
+_build_features()
 
 new_label = label_vector[0:set_size]
 
@@ -283,9 +272,9 @@ new_label_matrix.reshape(shape)
 
 new_feature_vector = np.array(posneg_feature_vectors)
 
-shape2 = (set_size,len(new_feature_vector[0]))
+'''shape2 = (set_size,len(new_feature_vector[0]))
 
-new_feature_vector.reshape(shape2)
+new_feature_vector.reshape(shape2)'''
 
 train_set = featureSelect(new_feature_vector,new_label_matrix)
 k_fold_cross_validation(train_set,new_label_matrix)
