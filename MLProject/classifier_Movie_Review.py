@@ -120,7 +120,7 @@ def _build_features_train(train_data):
         global_index=global_index+1
     
    
-    #
+    
     posneg=dict(posneg.items()+word_dict.items())
     
 
@@ -309,7 +309,7 @@ def _build_features():
             if word in pos:
                 positive_score = positive_score+1
             if word in neg:
-                negative_score = negative_score + 1
+                negative_score = negative_score+1
 
         if((positive_score + negative_score)!= 0):
             positive_feature = positive_score/(positive_score + negative_score);
@@ -364,7 +364,7 @@ for i in range(num_folds):
     
     testing=full_data[i*subset_size:][:subset_size]
     
-    training=full_data[:i*subset_size] + full_data[(i+1)*subset_size:]
+    training=full_data[:i*subset_size]+full_data[(i+1)*subset_size:]
         
     print "buliding fv from training"
     
@@ -424,10 +424,6 @@ for i in range(num_folds):
     
     
     
-
-
-
-
 
 
 
