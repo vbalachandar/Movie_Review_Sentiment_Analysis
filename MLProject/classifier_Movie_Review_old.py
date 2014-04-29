@@ -1,3 +1,4 @@
+
 from itertools import repeat
 import csv
 import re
@@ -16,8 +17,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import linear_model
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-
 import gc
 
 
@@ -27,21 +26,20 @@ posneg_feature_vectors=[]
 posneg_feature_vectors_test=[]
 posneg_feature_vectors_train = []
 posneg_feature_vectors_test = []
+
 full_data=[]
 label_vector = []
 pos = dict()
 neg = dict()
 posneg = dict()
 part_of_speech=[]
-#global_index = 0
-set_size= 5000
+global_index = 0
+set_size= 3000
 top_k_features = 200
 end_index=0
 count=0
 stopwords = nltk.corpus.stopwords.words('english')
 stopwords.remove('not')
-train_size=0.9*set_size
-
 
 def _read_data(file_name):
     """
@@ -49,7 +47,7 @@ def _read_data(file_name):
     :rtype : object
     """
     
-    row_cnt=-1;
+    row_cnt=0;
     with open(file_name, 'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
 
@@ -57,9 +55,6 @@ def _read_data(file_name):
         for row in tsvin:
             if(row_cnt==set_size):
                 break
-            if(row_cnt==-1):
-                row_cnt=row_cnt+1
-                continue
             
             row_cnt=row_cnt+1
             inner_list = (_expand_clitics(row[2])).split(' ')
@@ -108,12 +103,12 @@ def _build_features_train(train_data):
 
     # Adding words that are not present in the posneg dictionary
     #please comment out this section if you must use more than 7000 samples
-    global global_index
+   
     
     
     
     #Resetting the global index to one more than the length of posneg dictionary
-    #global_index=len(posneg)
+    global_index=end_index+1
     
    
     
@@ -124,7 +119,7 @@ def _build_features_train(train_data):
     for word in part_of_speech:
         word_dict[word]=global_index
         global_index=global_index+1
-     
+    
    
     
     posneg=dict(posneg.items()+word_dict.items())
@@ -187,9 +182,8 @@ def _tag_input_sentence(input_phrase):
 
 #build the representation of the training data
 def build_train_data_matrix(size):
-    
-    
-    
+
+    print "gobal range in train",global_index
     for j in range(size):
         vect = [0 for i in range(global_index)]
         for word,tag in zip(word_lists[j],word_list_tagged[j]):
@@ -206,7 +200,6 @@ def build_train_data_matrix(size):
             
             # words not in the feature vector are considered as unknown
             else:
-                
                 vect[posneg['unknown']]=vect[posneg['unknown']]+1
                 
         posneg_feature_vectors.append(vect)
@@ -217,8 +210,8 @@ def build_train_data_matrix(size):
 
 #building the representation of the test data
 def build_test_data_matrix(size):
-    
-    
+    vect=[]
+    print "gobal range in test",global_index
     for j in range(size):
         vect = [0 for i in range(global_index)]
         for word,tag in zip(word_lists[j],word_list_tagged[j]):
@@ -227,6 +220,7 @@ def build_test_data_matrix(size):
            
             #Adding direction changer as a feature
             elif tag=='IN' or word.lower() in ('but','yet'):
+                print global_index,posneg['dc']
                 vect[posneg['dc']]=1
           
             # adding determiner as a feature
@@ -236,22 +230,13 @@ def build_test_data_matrix(size):
             # words not in the feature vector are considered as unknown
             else:
                 
+                #print "range",range(global_index),posneg['unknown']
                 vect[posneg['unknown']]=vect[posneg['unknown']]+1
                 
         posneg_feature_vectors_test.append(vect)
         
 
     return 0
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -262,22 +247,28 @@ def _create_pos_neg_features():
     with open('C:\\Users\\balachandar\\Documents\\GitHub\\Movie_Review_Sentiment_Analysis\\opinion-lexicon-English\\positive-words.txt', 'r') as f:
         positives = f.readlines()[35:]
         for i in range(len(positives)):
+            dictionary_index = dictionary_index+1
             pos[positives[i].rstrip('\n')] = dictionary_index
             posneg[positives[i].rstrip('\n')] = dictionary_index
-            dictionary_index = dictionary_index+1
+            
   
   
     #with open('/media/New Volume/Acads/UIClinks/Machine Learning/Project/opinion-lexicon-English/negative-words.txt', 'r') as f:
     with open('C:\\Users\\balachandar\\Documents\\GitHub\\Movie_Review_Sentiment_Analysis\\opinion-lexicon-English\\negative-words.txt', 'r') as f:
         negatives = f.readlines()[35:]
         for k in range(len(negatives)):
+            dictionary_index = dictionary_index+1
             neg[negatives[k].rstrip('\n')] = dictionary_index
             posneg[negatives[k].rstrip('\n')] = dictionary_index
-            dictionary_index = dictionary_index+1
+            
     
-    
-    
+     
 
+   
+    
+    
+    print len(posneg),dictionary_index
+    
     posneg['unknown']=dictionary_index
     
     dictionary_index=dictionary_index+1
@@ -289,24 +280,23 @@ def _create_pos_neg_features():
         
     posneg['DT']=dictionary_index
     
-    dictionary_index=dictionary_index+1
-    
+       
     end_index=dictionary_index
     
-    print "end",end_index
     
     
-    global global_index
+    
     
     global_index = dictionary_index
     
-    print "posneg len",len(posneg)
+    print "posneg len",len(posneg),posneg['DT'],end_index,dictionary_index,global_index
     return 0
 
 
 
 def _build_features():
 
+    feature_vectors=[]
     for training_sample in range(len(word_lists)):
         positive_score = 0
         negative_score = 0
@@ -323,12 +313,13 @@ def _build_features():
         if((positive_score + negative_score)!= 0):
             positive_feature = positive_score/(positive_score + negative_score);
             negative_feature = negative_score/(negative_score + positive_score);
+        
         vect.append(positive_feature)
-        vect.append(negative_feature )
+        vect.append(negative_feature)
 
-        posneg_feature_vectors.append(vect)
+        feature_vectors.append(vect)
 
-    return 0
+    return feature_vectors
 
 
 
@@ -350,41 +341,6 @@ def k_fold_cross_validation(train_set,test_set,train_label,test_label):
     clf.fit(train_set,train_label)
     pred_label=clf.predict(test_set)
     print "Accuracy",accuracy_score(test_label, pred_label)
-    
-    cm = confusion_matrix(test_label, pred_label)
-    cm_num = np.array(cm)
-    print "Confusion Matrix: "+str(cm_num)
-    
-    print "---------- \n"
-    
-    #print "sum of diagonal = "+str(np.trace(cm))
-    #result_log.write(str("sum of all CM = "+str(np.sum(cm))+"\n"))
-    accRate = float((float(np.trace(cm))/float(np.sum(cm)))) * 100
-    print "Classifier Accuracy = " +str(accRate)
-    
-    print float(cm[1,1])/float((cm[1,1]+cm[1,2]))
-    pr_neg = float(cm[0,0]) / float(cm[0,0] + cm[1,0]+cm[2,0])
-    print "Precision for negative Data: ",str(pr_neg)
-    
-    re_neg = float(cm[0,0]) / float(cm[0,0] + cm[0,1]+cm[0,2])
-    print "Recall for negative Data: "+ str(re_neg)
-    
-    pr_neu = float(cm[1,1]) / float(cm[0,1] + cm[1,1]+cm[2,1])
-    print "Precision for neutral Data: "+ str(pr_neu)
-    
-    re_neu = float(cm[1,1]) / float(cm[1,0] + cm[1,1]+cm[1,2])
-    print "Recall for neutral data: "+ str(re_neu)
-    
-    pr_pos = float(cm[2,2]) / float(cm[0,2] + cm[1,2]+cm[2,2])
-    print "Precision for positive Data: "+ str(pr_pos)
-    
-    re_pos = float(cm[2,2]) / float(cm[2,0] + cm[2,1]+cm[2,2])
-    print "Recall for positive data: "+ str(re_pos)
-    
-
-    
-    
-    
     return 0
 
 
@@ -404,70 +360,75 @@ num_folds = 1
 
 subset_size = len(full_data)/num_folds
 
-
-#for i in range(num_folds):
+for i in range(num_folds):
     
-#testing=full_data[i*subset_size:][:subset_size]
-testing=full_data[int(train_size)+1:]    
-#training=full_data[:i*subset_size]+full_data[(i+1)*subset_size:]
-training=full_data[:int(train_size)]
+    testing=full_data[i*subset_size:][:subset_size]
+    
+    training=full_data[:i*subset_size]+full_data[(i+1)*subset_size:]
         
-print "buliding fv from training"
+    print "buliding fv from training"
     
-_build_features_train(training)
+    _build_features_train(training)
     
-build_train_data_matrix(len(training))
+    build_train_data_matrix(len(training))
+    #posneg_feature_vectors=_build_features()
        
     
-print "buliding fv from testing"
-_build_features_test(testing)
+    print "buliding fv from testing"
+    _build_features_test(testing)
     
-build_test_data_matrix(len(testing))
-    
-    
-    
-#Extracting class labels for the training set
-#new_label = label_vector[:i*subset_size]+label_vector[(i+1)*subset_size:]
-new_label = label_vector[:int(train_size)]
-new_label_matrix = np.array(new_label)
-shape = (len(training),1)
-new_label_matrix.reshape(shape)
-    
-    
-# Extracting class labels for the testing set
-#test_label = label_vector[i*subset_size:][:subset_size]
-test_label = label_vector[int(train_size)+1:]
-test_label_matrix = np.array(test_label)
-shape = (len(testing),1)
-test_label_matrix.reshape(shape)
+    build_test_data_matrix(len(testing))
+    #posneg_feature_vectors_test = _build_features()
     
     
     
+    #Extracting class labels for the training set
+    new_label = label_vector[:i*subset_size]+label_vector[(i+1)*subset_size:]
+    new_label_matrix = np.array(new_label)
+    shape = (len(training),1)
+    new_label_matrix.reshape(shape)
     
-new_feature_vector = np.array(posneg_feature_vectors)
-shape2 = (len(training),len(new_feature_vector[0]))
     
-print "shape",shape2,len(new_feature_vector)
-new_feature_vector.reshape(shape2)
+    # Extracting class labels for the testing set
+    test_label = label_vector[i*subset_size:][:subset_size]
+    test_label_matrix = np.array(test_label)
+    shape = (len(testing),1)
+    test_label_matrix.reshape(shape)
     
     
-test_feature_vector = np.array(posneg_feature_vectors_test)
-shape3 = (len(testing),len(test_feature_vector[0]))
-test_feature_vector.reshape(shape3)
+    
+    
+    new_feature_vector = np.array(posneg_feature_vectors)
+    shape2 = (len(training),len(new_feature_vector[0]))
+    new_feature_vector.reshape(shape2)
+    
+    
+    test_feature_vector = np.array(posneg_feature_vectors_test)
+    shape3 = (len(testing),len(test_feature_vector[0]))
+    test_feature_vector.reshape(shape3)
     
     
     
     
 
 
-train_set,test_set = featureSelect(new_feature_vector,new_label_matrix,test_feature_vector)
-k_fold_cross_validation(train_set,test_set,new_label_matrix,test_label_matrix)
+    train_set,test_set = featureSelect(new_feature_vector,new_label_matrix,test_feature_vector)
+    k_fold_cross_validation(train_set,test_set,new_label_matrix,test_label_matrix)
     
     
     
-#Setting the feature vector variables to empty at 
-posneg_feature_vectors=[]
-posneg_feature_vectors_test=[]
+    #Setting the feature vector variables to empty 
+    posneg_feature_vectors=[]
+    posneg_feature_vectors_test=[]
     
-del new_feature_vector
-del test_feature_vector
+    del new_feature_vector
+    del test_feature_vector
+    
+    
+    
+
+
+
+
+
+
