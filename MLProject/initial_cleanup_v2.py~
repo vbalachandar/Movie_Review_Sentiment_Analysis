@@ -1,0 +1,126 @@
+__author__ = 'abhinaya'
+
+from itertools import repeat
+import csv
+import re
+import sklearn
+
+from itertools import ifilterfalse
+from nltk import pos_tag, word_tokenize
+from nltk.corpus import treebank
+from sklearn.feature_selection import SelectKBest, chi2
+
+
+word_lists = []
+posneg_feature_vectors = []
+label_vector = []
+pos = dict()
+neg = dict()
+
+def _read_data(file_name):
+    """
+
+    :rtype : object
+    """
+    with open(file_name, 'rb') as tsvin:
+        tsvin = csv.reader(tsvin, delimiter='\t')
+
+        index = 0
+        for row in tsvin:
+            inner_list = (_expand_clitics(row[2])).split(' ')
+            word_lists.append(inner_list)
+            label_vector.append(row[3])
+            #_tag_input_sentence(_word_list)
+
+    return 0
+
+
+def _read_sentiment_words(file_name):
+    return 0;
+
+
+def _expand_clitics(input_phrase):
+    """
+
+    :rtype : basestring
+    """
+
+    # input_phrase = re.sub('(can\'t)',"cannot",input_phrase)
+    input_phrase = re.sub('(ca n\'t)', "cannot", input_phrase)  # because it is like this in the training data
+    input_phrase = re.sub('(n\'t)', " not", input_phrase)
+    return input_phrase
+
+
+def _create_matrix():
+    return 0
+
+
+def _create_feature_vector():
+    return 0
+
+
+def _tag_input_sentence(input_phrase):
+    tagged = pos_tag(word_tokenize(input_phrase))
+    #print tagged
+    return 0
+
+
+def _create_pos_neg_features():
+
+    dictionary_index = 0
+
+    with open('/media/New Volume/Acads/UIClinks/Machine Learning/Project/opinion-lexicon-English/positive-words.txt', 'r') as f:
+        positives = f.readlines()[35:]
+        for i in range(len(positives)):
+            pos[positives[i].rstrip('\n')] = dictionary_index
+            dictionary_index = dictionary_index+1
+
+
+    with open('/media/New Volume/Acads/UIClinks/Machine Learning/Project/opinion-lexicon-English/negative-words.txt', 'r') as f:
+        negatives = f.readlines()[35:]
+        for k in range(len(negatives)):
+            neg[negatives[k].rstrip('\n')] = dictionary_index
+            dictionary_index = dictionary_index+1
+
+    return 0
+
+def _build_features():
+
+    for training_sample in range(len(word_lists)):
+        positive_score = 0
+        negative_score = 0
+        positive_feature = 0
+        negative_feature = 0
+        vect = []
+
+        for word in word_lists[training_sample]:
+            if word in pos:
+                positive_score = positive_score+1
+            if word in neg:
+                negative_score = negative_score + 1
+
+        if((positive_score + negative_score)!= 0):
+            positive_feature = positive_score/(positive_score + negative_score);
+            negative_feature = negative_score/(negative_score + positive_score);
+        vect.append(positive_feature)
+        vect.append(negative_feature)
+
+        posneg_feature_vectors.append(vect)
+
+    return 0
+
+def featureSelect(X,y):#X_test):
+    ch2=SelectKBest(chi2,k=3)
+    X_train=ch2.fit_transform(X, y)
+    #X_test=ch2.transform(X_test)
+    return X_train #,X_test
+
+
+val = _read_data('/media/New Volume/Acads/UIClinks/Machine Learning/Project/train.tsv')
+_create_pos_neg_features()
+_build_features()
+print posneg_feature_vectors
+#print featureSelect(posneg_feature_vectors,label_vector)
+
+#print posneg_feature_vectors
+
